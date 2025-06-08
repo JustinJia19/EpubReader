@@ -8,6 +8,8 @@
 
 后端：Spring Boot，Spring Security，MyBatis，Redis
 
+三方库：jszip.js，epub.js（用于前端对书籍的解析与渲染），epublib（后端解析epub元数据，实现自动填充）
+
 数据库：MySQL
 
 ## TODO list
