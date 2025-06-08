@@ -113,7 +113,7 @@ export default {
         console.log('开始获取统计数据...');
 
         const response = await axios.get('/statistics', {
-          baseURL: 'http://'
+          baseURL: 'http://192.168.0.100:8082'
         });
 
         console.log('统计数据:', response.data);
@@ -147,63 +147,83 @@ export default {
     };
 
     // 渲染图表
-    const renderChart = (categories, echartsLib) => {
-      try {
-        console.log('开始渲染图表');
+const renderChart = async (categories, echartsLib) => {
+        try {
+          console.log('开始渲染图表');
 
-        // 销毁已有实例
-        if (chartInstance) {
-          chartInstance.dispose();
-          chartInstance = null;
-        }
+          // 销毁已有实例
+          if (chartInstance) {
+            chartInstance.dispose();
+            chartInstance = null;
+          }
 
-        // 获取容器
-        const container = chartContainer.value;
-        if (!container) {
-          console.error('图表容器未找到');
-          return;
-        }
-
-        // 初始化图表
-        chartInstance = echartsLib.init(container);
-        console.log('图表实例已创建');
-
-        // 配置项
-        const colors = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#3498db','#FFA500'];
-
-        const option = {
-          tooltip: { trigger: 'item' },
-          legend: {
-            top: '5%',
-            left: 'center'
-          },
-          series: [{
-            type: 'pie',
-            radius: ['40%', '70%'],
-            avoidLabelOverlap: false,
-            data: categories.map((item, index) => ({
-              value: item.count,
-              name: item.name,
-              itemStyle: { color: colors[index % colors.length] }
-            })),
-            emphasis: {
-              itemStyle: {
-                shadowBlur: 10,
-                shadowColor: 'rgba(0, 0, 0, 0.5)'
+          // 异步获取容器，最多重试 10 次，每次间隔 500ms
+          const getContainerWithRetry = async (retries = 10, delay = 500) => {
+            let attempts = 0;
+            while (attempts < retries) {
+              const container = chartContainer.value;
+              if (container) {
+                return container;
               }
+              attempts++;
+              console.warn(`容器未就绪，第 ${attempts} 次重试...`);
+              await new Promise(resolve => setTimeout(resolve, delay));
             }
-          }]
-        };
+            throw new Error('图表容器始终未找到');
+          };
 
-        chartInstance.setOption(option);
+          // 获取容器（带重试）
+          const container = await getContainerWithRetry().catch(err => {
+            console.error(err);
+            return null;
+          });
 
-        // 设置自适应大小
-        setupResizeObserver(container);
-      } catch (error) {
-        console.error('图表渲染失败:', error);
-        ElMessage.error('图表渲染失败');
-      }
-    };
+          if (!container) {
+            console.error('无法获取图表容器，停止渲染');
+            return;
+          }
+
+          // 初始化图表
+          chartInstance = echartsLib.init(container);
+          console.log('图表实例已创建');
+
+          // 配置项
+          const colors = ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#3498db','#FFA500'];
+
+          const option = {
+            tooltip: { trigger: 'item' },
+            legend: {
+              top: '5%',
+              left: 'center'
+            },
+            series: [{
+              type: 'pie',
+              radius: ['40%', '70%'],
+              avoidLabelOverlap: false,
+              data: categories.map((item, index) => ({
+                value: item.count,
+                name: item.name,
+                itemStyle: { color: colors[index % colors.length] }
+              })),
+              emphasis: {
+                itemStyle: {
+                  shadowBlur: 10,
+                  shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+              }
+            }]
+          };
+
+          // 设置配置
+          chartInstance.setOption(option);
+
+          // 设置自适应大小
+          setupResizeObserver(container);
+        } catch (error) {
+          console.error('图表渲染失败:', error);
+          ElMessage.error('图表渲染失败');
+        }
+      };
 
     // 响应式调整
     const setupResizeObserver = (container) => {
