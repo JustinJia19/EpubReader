@@ -102,7 +102,7 @@
         </div>
       </div>
 
-      <!-- 书籍表格 - 新增封面列 -->
+      <!-- 书籍表格 -->
       <el-table 
         :data="paginatedBookList" 
         border 
@@ -132,7 +132,14 @@
         <el-table-column prop="id" label="ID" width="60" />
         <el-table-column prop="title" label="书名" min-width="150" />
         <el-table-column prop="author" label="作者" width="120" />
-        <el-table-column prop="description" label="描述" min-width="200" />
+        <!-- 描述列添加固定高度和滚动 -->
+        <el-table-column prop="description" label="描述" min-width="200">
+          <template #default="{ row }">
+            <div class="scrollable-description">
+              {{ row.description }}
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column prop="category" label="分类" width="120">
           <template #default="{ row }">
             {{ categoryMap[row.category] }}
@@ -370,7 +377,7 @@ const checkAuthStatus = async () => {
       isAuthenticated.value = false
     } else {
       console.error('认证检查失败:', error)
-      ElMessage.error('检查登录状态失败')
+      // ElMessage.error('检查登录状态失败')
     }
   }
 }
@@ -703,6 +710,23 @@ const previewCover = (coverUrl) => {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+/* 限制描述列高度并添加滚动条 */
+.scrollable-description {
+  max-height: 150px; /* 固定高度 */
+  overflow-y: auto;  /* 垂直滚动 */
+  padding-right: 8px; /* 避免滚动条遮挡文字 */
+  word-break: break-word; /* 允许单词内断行 */
+}
+
+/* 优化滚动条样式 */
+.scrollable-description::-webkit-scrollbar {
+  width: 6px;
+}
+.scrollable-description::-webkit-scrollbar-thumb {
+  background-color: #c0c4cc;
+  border-radius: 3px;
 }
 
 .app-header {
