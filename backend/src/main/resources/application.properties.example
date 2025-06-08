@@ -1,0 +1,29 @@
+spring.application.name=epub_demo1
+# ????
+spring.servlet.multipart.max-file-size=50MB
+spring.servlet.multipart.max-request-size=50MB
+
+# ????
+file.upload-dir=your path
+cover.upload-dir=your path
+
+server.port=
+
+# ?????
+spring.datasource.url=jdbc:mysql://localhost:3306/database_name
+spring.datasource.username=your username
+spring.datasource.password=your password
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+mybatis.configuration.map-underscore-to-camel-case=true
+spring.main.allow-circular-references=true
+server.servlet.session.timeout=30m
+
+# Redis??
+spring.data.redis.host=localhost
+spring.data.redis.port=6379
+spring.data.redis.database=0
+spring.data.redis.timeout=5000
+spring.data.redis.lettuce.pool.max-active=8
+spring.data.redis.lettuce.pool.max-idle=8
+spring.data.redis.lettuce.pool.min-idle=0
